@@ -1,0 +1,68 @@
+name: Update Distribution Assets
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 20 * * *'
+  push:
+    branches:
+      - gh-pages
+    paths:
+      - '.github/workflows/update-distribution.yml'
+      - 'scripts/generate-distribution.sh'
+      - 'webpack.config.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - 'src/**'
+      - 'public/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-distribution-assets
+  cancel-in-progress: false
+
+jobs:
+  build-and-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build bundle
+        run: npm run build
+
+      - name: Generate userscript and extension artifacts
+        run: ./scripts/generate-distribution.sh
+
+      - name: Validate manifests
+        run: |
+          python -m json.tool extensions/chrome/manifest.json >/dev/null
+          python -m json.tool extensions/firefox/manifest.json >/dev/null
+
+      - name: Commit updated artifacts
+        run: |
+          if git diff --quiet; then
+            echo "No distribution changes detected."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add install-mai-tools.meta.js install-mai-tools.user.js extensions/chrome extensions/firefox mai-tools-chrome-extension.zip mai-tools-firefox-extension.zip
+          git commit -m "chore: update distribution assets"
+          git push

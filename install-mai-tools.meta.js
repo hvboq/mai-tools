@@ -11,19 +11,3 @@
 // @downloadURL  https://cdn.jsdelivr.net/gh/hvboq/mai-tools@gh-pages/install-mai-tools.user.js
 // @updateURL    https://cdn.jsdelivr.net/gh/hvboq/mai-tools@gh-pages/install-mai-tools.meta.js
 // ==/UserScript==
-
-(function() {
-    'use strict';
-    const scriptId = 'mai-tools-user-script-loader';
-    if (document.getElementById(scriptId)) {
-        return;
-    }
-
-    const script = document.createElement('script');
-    script.id = scriptId;
-    script.src = 'https://hvboq.github.io/mai-tools/scripts/all-in-one.js?t=' + Math.floor(Date.now() / 60000);
-    script.onload = function() {
-        script.remove();
-    };
-    (document.body || document.documentElement).append(script);
-})();

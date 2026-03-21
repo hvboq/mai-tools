@@ -1,32 +1,43 @@
-## ⚠️ Notice: Limited Maintenance
+# mai-tools distribution package
 
-Jul 11, 2025
+This workspace contains three delivery targets for `install-mai-tools.user.js`.
 
-This project is no longer actively developed. Features may break at any time and may or may not receive fixes. 
+## 1. Userscript subscription URLs
 
-# Tools for maimai
+- jsDelivr install URL: `https://cdn.jsdelivr.net/gh/hvboq/mai-tools@gh-pages/install-mai-tools.user.js`
+- jsDelivr metadata URL: `https://cdn.jsdelivr.net/gh/hvboq/mai-tools@gh-pages/install-mai-tools.meta.js`
+- GitHub Raw install URL: `https://raw.githubusercontent.com/hvboq/mai-tools/gh-pages/install-mai-tools.user.js`
+- GitHub Pages loader URL: `https://hvboq.github.io/mai-tools/install-mai-tools.user.js`
 
-## Use
+`install-mai-tools.user.js` and `install-mai-tools.meta.js` are suitable for script managers that can subscribe to a remote userscript URL, including tools that track `@updateURL` and `@downloadURL`.
 
-Method 1. Follow https://myjian.github.io/mai-tools/#howto
+## 2. Chrome extension
 
-Method 2. Install the userscript: https://github.com/myjian/mai-tools/blob/gh-pages/install-mai-tools.user.js . Your browser must support Tampermonkey or other userscript managers before you can install the userscript. Once the userscript is installed, mai-tools will be loaded automatically on every maimai-NET page.
+Recommended install URL for userscript managers:
 
-## Build
+- `https://cdn.jsdelivr.net/gh/hvboq/mai-tools@gh-pages/install-mai-tools.user.js`
 
-    npm install
-    npm run build
+For a native extension install, load the folder below with `chrome://extensions` -> `Load unpacked`.
 
-## Run
+- `extensions/chrome`
+- Packaged archive: `mai-tools-chrome-extension.zip`
 
-    npm start
+The Chrome package bundles `all-in-one.js` locally instead of loading remote code at runtime.
 
-## Develop
+## 3. Firefox extension
 
-    npm run watch
-    npm start
+Recommended install URL for userscript managers:
 
-## Code Search
+- `https://cdn.jsdelivr.net/gh/hvboq/mai-tools@gh-pages/install-mai-tools.user.js`
 
-Using SourceGraph
-https://sourcegraph.com/search?q=context%3Aglobal+repo%3A%5Egithub%5C.com%2Fmyjian%2Fmai-tools%24+GameRegion&patternType=standard&sm=1&groupBy=path (replace GameRegion with whatever you want to find)
+For a native extension install, load the folder below with `about:debugging` -> `This Firefox` -> `Load Temporary Add-on`, then choose `manifest.json`.
+
+- `extensions/firefox`
+- Packaged archive: `mai-tools-firefox-extension.zip`
+
+The Firefox package also bundles `all-in-one.js` locally.
+
+## Notes
+
+- If you want to publish the extensions through stores, keep the bundled `all-in-one.js` updated whenever `https://hvboq.github.io/mai-tools/scripts/all-in-one.js` changes.
+- If you only need AdGuard or Unicorn Pro subscription delivery, the jsDelivr userscript URL is the simplest stable URL to expose.
