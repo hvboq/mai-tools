@@ -58,6 +58,8 @@ review/approval before public release. See `extensions/samsung-internet/README.m
 
 - Chrome, Firefox, and Samsung Internet extension packages bundle `all-in-one.js` for
   store submission. Rebuild and repackage them whenever source code changes.
+- Distribution versions are generated from the source repository commit date and count
+  unless `MAI_TOOLS_VERSION` is set explicitly.
 - The scheduled distribution workflow and GitHub Pages deploy build the upstream
   `myjian/mai-tools` `gh-pages` branch, then write/serve the generated artifacts
   from this repository.

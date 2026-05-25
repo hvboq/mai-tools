@@ -1,7 +1,7 @@
 import {ChartRecord} from '../common/chart-record';
 import {ChartRecordWithRating} from './types';
 
-type RecordNumberProp = 'rating' | 'level' | 'achievement';
+type RecordNumberProp = 'rating' | 'level' | 'achievement' | 'version';
 type RecordStringProp = 'songName';
 
 function compareNumbers(x: number, y: number) {
@@ -35,8 +35,8 @@ export function compareCandidate(
   record1: ChartRecordWithRating,
   record2: ChartRecordWithRating,
 ): number {
-  const nextRating1 = record1.nextRanks.values().next().value;
-  const nextRating2 = record2.nextRanks.values().next().value;
+  const nextRating1 = record1.target;
+  const nextRating2 = record2.target;
   if (!nextRating1 && !nextRating2) {
     return 0;
   } else if (!nextRating1) {
@@ -59,8 +59,11 @@ export function compareSongsByNextRating(
   record1: ChartRecordWithRating,
   record2: ChartRecordWithRating,
 ) {
-  const nextRating1 = record1.nextRanks.values().next().value;
-  const nextRating2 = record2.nextRanks.values().next().value;
+  const nextRating1 = record1.target;
+  const nextRating2 = record2.target;
+  if (!nextRating1 || !nextRating2) {
+    return 0;
+  }
   return (
     compareNumbers(nextRating1.delta, nextRating2.delta) ||
     compareSongsByNumAttr(record1, record2, 'level')
@@ -73,6 +76,16 @@ export function compareSongsByLevel(
 ) {
   // smaller first
   return compareSongsByNumAttr(record2, record1, 'level');
+}
+
+export function compareSongsByVersion(
+  record1: ChartRecordWithRating,
+  record2: ChartRecordWithRating,
+) {
+  // for charts in the same version, sort by chart type
+  return (
+    compareSongsByNumAttr(record2, record1, 'version') || compareSongsByChartType(record2, record1)
+  );
 }
 
 export function compareSongsByAchv(record1: ChartRecordWithRating, record2: ChartRecordWithRating) {
@@ -89,36 +102,6 @@ export function compareSongsByRank(record1: ChartRecordWithRating, record2: Char
   } else if (record1.rankTitle.includes('AP')) {
     return -1;
   } else if (record2.rankTitle.includes('AP')) {
-    return 1;
-  } else {
-    return (
-      compareSongsByNumAttr(record1, record2, 'achievement') ||
-      compareSongsByNumAttr(record1, record2, 'level')
-    );
-  }
-}
-
-export function compareSongsByNextRank(
-  record1: ChartRecordWithRating,
-  record2: ChartRecordWithRating,
-) {
-  if (!record1.nextRanks && !record2.nextRanks) {
-    return compareSongsByRank(record1, record2);
-  } else if (!record2.nextRanks || record2.nextRanks.size === 0) {
-    return -1;
-  } else if (!record1.nextRanks || record1.nextRanks.size === 0) {
-    return 1;
-  } else if (
-    record1.nextRanks.keys().next().value === 'AP' &&
-    record2.nextRanks.keys().next().value === 'AP'
-  ) {
-    return (
-      compareSongsByNumAttr(record1, record2, 'achievement') ||
-      compareSongsByNumAttr(record1, record2, 'level')
-    );
-  } else if (record1.nextRanks.keys().next().value === 'AP') {
-    return -1;
-  } else if (record2.nextRanks.keys().next().value === 'AP') {
     return 1;
   } else {
     return (

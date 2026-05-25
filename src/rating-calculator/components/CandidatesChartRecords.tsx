@@ -13,8 +13,8 @@ import {
   compareSongsByChartType,
   compareSongsByLevel,
   compareSongsByName,
-  compareSongsByNextRank,
   compareSongsByNextRating,
+  compareSongsByVersion,
 } from '../record-comparator';
 import {ChartRecordWithRating, ColumnType, RatingData} from '../types';
 import {CandidatesPlayedToggle} from './CandidatesPlayedToggle';
@@ -29,21 +29,21 @@ const OLD_CANDIDATE_SONGS_POOL_SIZE = 250;
 const COLUMNS: ReadonlyArray<ColumnType> = [
   ColumnType.NO,
   ColumnType.SONG_TITLE,
+  ColumnType.VERSION,
   ColumnType.CHART_TYPE,
   ColumnType.LEVEL,
   ColumnType.ACHIEVEMENT,
-  ColumnType.NEXT_RANK,
-  ColumnType.NEXT_RATING,
+  ColumnType.TARGET,
 ];
 
 const COMPARATOR: Map<ColumnType, (x: ChartRecordWithRating, y: ChartRecordWithRating) => number> =
   new Map([
     [ColumnType.SONG_TITLE, compareSongsByName],
+    [ColumnType.VERSION, compareSongsByVersion],
     [ColumnType.CHART_TYPE, compareSongsByChartType],
     [ColumnType.LEVEL, compareSongsByLevel],
     [ColumnType.ACHIEVEMENT, compareSongsByAchv],
-    [ColumnType.NEXT_RANK, compareSongsByNextRank],
-    [ColumnType.NEXT_RATING, compareSongsByNextRating],
+    [ColumnType.TARGET, compareSongsByNextRating],
   ]);
 
 interface Props {

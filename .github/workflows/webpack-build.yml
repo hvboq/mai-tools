@@ -45,6 +45,12 @@ jobs:
           npm ci
           npm run build
 
+      - name: Validate hosted bundle
+        working-directory: upstream-source
+        run: |
+          grep -q "$MAI_TOOLS_HOSTED_BASE_URL" build/scripts/all-in-one.js
+          ! grep -q "https://myjian.github.io/mai-tools" build/scripts/all-in-one.js
+
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:

@@ -11,6 +11,7 @@ on:
       - '.github/workflows/update-distribution.yml'
       - 'scripts/generate-distribution.sh'
       - 'scripts/prepare-upstream-source.mjs'
+      - 'scripts/validate-distribution.mjs'
       - 'webpack.config.js'
       - 'package.json'
       - 'package-lock.json'
@@ -64,20 +65,21 @@ jobs:
         working-directory: upstream-source
         run: npm ci
 
+      - name: Audit dependencies
+        working-directory: upstream-source
+        run: npm audit --audit-level=critical
+
       - name: Build upstream bundle
         working-directory: upstream-source
         run: npm run build
 
       - name: Generate userscript and extension artifacts
         working-directory: distribution
-        run: MAI_TOOLS_BUILD_DIR="$GITHUB_WORKSPACE/upstream-source/build" ./scripts/generate-distribution.sh
+        run: MAI_TOOLS_SOURCE_DIR="$GITHUB_WORKSPACE/upstream-source" MAI_TOOLS_BUILD_DIR="$GITHUB_WORKSPACE/upstream-source/build" ./scripts/generate-distribution.sh
 
-      - name: Validate manifests
+      - name: Validate distribution artifacts
         working-directory: distribution
-        run: |
-          python -m json.tool extensions/chrome/manifest.json >/dev/null
-          python -m json.tool extensions/firefox/manifest.json >/dev/null
-          python -m json.tool extensions/samsung-internet/manifest.json >/dev/null
+        run: MAI_TOOLS_BUILD_DIR="$GITHUB_WORKSPACE/upstream-source/build" node scripts/validate-distribution.mjs
 
       - name: Commit updated artifacts
         working-directory: distribution

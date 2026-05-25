@@ -2,14 +2,81 @@
 set -eu
 
 ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-VERSION="${MAI_TOOLS_VERSION:-0.1.1}"
 BUILD_DIR="${MAI_TOOLS_BUILD_DIR:-$ROOT_DIR/build}"
+SOURCE_DIR="${MAI_TOOLS_SOURCE_DIR:-$ROOT_DIR}"
 BUNDLE_FILE="$BUILD_DIR/scripts/all-in-one.js"
+
+date_part() {
+  format="$1"
+  timestamp="$2"
+  date -u -d "@$timestamp" "$format" 2>/dev/null ||
+    date -u -r "$timestamp" "$format" 2>/dev/null ||
+    date -u "$format"
+}
+
+strip_leading_zeroes() {
+  value=$(printf '%s' "$1" | sed 's/^0*//')
+  if [ -z "$value" ]; then
+    value=0
+  fi
+  printf '%s' "$value"
+}
+
+version_from_source() {
+  commit_count=$(git -C "$SOURCE_DIR" rev-list --count HEAD 2>/dev/null || true)
+  commit_timestamp=$(git -C "$SOURCE_DIR" log -1 --format=%ct 2>/dev/null || true)
+
+  case "$commit_count" in
+    ''|*[!0-9]*) commit_count=1 ;;
+  esac
+  case "$commit_timestamp" in
+    ''|*[!0-9]*) commit_timestamp=$(date -u +%s) ;;
+  esac
+
+  year=$(strip_leading_zeroes "$(date_part +%y "$commit_timestamp")")
+  day=$(strip_leading_zeroes "$(date_part +%j "$commit_timestamp")")
+  count=$((commit_count % 65536))
+  printf '0.%s.%s.%s' "$year" "$day" "$count"
+}
+
+validate_version() {
+  version="$1"
+  old_ifs=$IFS
+  IFS=.
+  set -- $version
+  IFS=$old_ifs
+
+  if [ "$#" -lt 1 ] || [ "$#" -gt 4 ]; then
+    return 1
+  fi
+
+  for part do
+    case "$part" in
+      ''|*[!0-9]*) return 1 ;;
+    esac
+    if [ "$part" -gt 65535 ]; then
+      return 1
+    fi
+  done
+}
+
+if [ -n "${MAI_TOOLS_VERSION:-}" ]; then
+  VERSION="$MAI_TOOLS_VERSION"
+else
+  VERSION=$(version_from_source)
+fi
+
+if ! validate_version "$VERSION"; then
+  echo "Invalid extension version: $VERSION" >&2
+  exit 1
+fi
 
 if [ ! -f "$BUNDLE_FILE" ]; then
   echo "Missing $BUNDLE_FILE. Run npm run build before packaging extensions." >&2
   exit 1
 fi
+
+echo "Packaging mai-tools distribution version $VERSION"
 
 mkdir -p "$ROOT_DIR/extensions/chrome" "$ROOT_DIR/extensions/firefox" "$ROOT_DIR/extensions/samsung-internet"
 cp "$BUNDLE_FILE" "$ROOT_DIR/extensions/chrome/all-in-one.js"

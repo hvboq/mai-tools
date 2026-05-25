@@ -5,6 +5,7 @@
   "main": "public/index.html",
   "scripts": {
     "build": "webpack",
+    "validate:distribution": "node scripts/validate-distribution.mjs",
     "watch": "webpack --env development --watch",
     "start": "npx serve build -l 8080"
   },
@@ -37,6 +38,6 @@
     "webpack-cli": "^4.10.0"
   },
   "engines": {
-    "node": ">=20.9.0"
+    "node": ">=18.19.1"
   }
 }

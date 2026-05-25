@@ -7,8 +7,8 @@ import {fetchSongGenre, getSongIdx} from './song-name-helper';
 import {BasicSongProps} from './song-props';
 
 export const ALLOWED_ORIGINS = [
-  'https://cdpn.io',
   'https://hvboq.github.io',
+  'https://cdpn.io',
   'https://myjian.github.io',
   'http://localhost:8080',
 ];
