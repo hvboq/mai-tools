@@ -1,6 +1,6 @@
 # mai-tools distribution package
 
-This workspace contains three delivery targets for `install-mai-tools.user.js`.
+This workspace contains userscript URLs and bundled extension packages for `mai-tools`.
 
 ## 1. Userscript subscription URLs
 
@@ -22,7 +22,8 @@ For a native extension install, load the folder below with `chrome://extensions`
 - `extensions/chrome`
 - Packaged archive: `mai-tools-chrome-extension.zip`
 
-The Chrome package bundles `all-in-one.js` locally instead of loading remote code at runtime.
+The Chrome package is store-oriented: `all-in-one.js` is bundled inside the extension
+archive and loaded with `chrome.runtime.getURL`.
 
 ## 3. Firefox extension
 
@@ -35,9 +36,31 @@ For a native extension install, load the folder below with `about:debugging` -> 
 - `extensions/firefox`
 - Packaged archive: `mai-tools-firefox-extension.zip`
 
-The Firefox package also bundles `all-in-one.js` locally.
+The Firefox package is store-oriented: `all-in-one.js` is bundled inside the extension
+archive and loaded from the extension package.
+
+## 4. Samsung Internet extension
+
+Recommended install URL for userscript managers:
+
+- `https://cdn.jsdelivr.net/gh/hvboq/mai-tools@gh-pages/install-mai-tools.user.js`
+
+For Samsung Internet for Android, use the folder below as a WebExtension candidate when
+validating with Samsung's extension program tooling.
+
+- `extensions/samsung-internet`
+- Packaged archive: `mai-tools-samsung-internet-extension.zip`
+
+Samsung Internet mobile extensions are distributed through Galaxy Store and require Samsung
+review/approval before public release. See `extensions/samsung-internet/README.md`.
 
 ## Notes
 
-- If you want to publish the extensions through stores, keep the bundled `all-in-one.js` updated whenever `https://hvboq.github.io/mai-tools/scripts/all-in-one.js` changes.
+- Chrome, Firefox, and Samsung Internet extension packages bundle `all-in-one.js` for
+  store submission. Rebuild and repackage them whenever source code changes.
+- The scheduled distribution workflow and GitHub Pages deploy build the upstream
+  `myjian/mai-tools` `gh-pages` branch, then write/serve the generated artifacts
+  from this repository.
+- The userscript remains a remote loader because userscript managers use `@downloadURL`
+  and `@updateURL` for subscription-style updates.
 - If you only need AdGuard or Unicorn Pro subscription delivery, the jsDelivr userscript URL is the simplest stable URL to expose.

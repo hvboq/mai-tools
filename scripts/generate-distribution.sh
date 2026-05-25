@@ -3,23 +3,18 @@ set -eu
 
 ROOT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 VERSION="${MAI_TOOLS_VERSION:-0.1.1}"
-BUILD_BUNDLE="$ROOT_DIR/build/scripts/all-in-one.js"
-LOCAL_BUNDLE="$ROOT_DIR/scripts/all-in-one.js"
-BUNDLE_URL="${MAI_TOOLS_BUNDLE_URL:-https://hvboq.github.io/mai-tools/scripts/all-in-one.js}"
-BUNDLE_TMP=$(mktemp)
-trap 'rm -f "$BUNDLE_TMP"' EXIT INT TERM
+BUILD_DIR="${MAI_TOOLS_BUILD_DIR:-$ROOT_DIR/build}"
+BUNDLE_FILE="$BUILD_DIR/scripts/all-in-one.js"
 
-if [ -f "$BUILD_BUNDLE" ]; then
-  cp "$BUILD_BUNDLE" "$BUNDLE_TMP"
-elif [ -f "$LOCAL_BUNDLE" ]; then
-  cp "$LOCAL_BUNDLE" "$BUNDLE_TMP"
-else
-  curl -fsSL "$BUNDLE_URL" -o "$BUNDLE_TMP"
+if [ ! -f "$BUNDLE_FILE" ]; then
+  echo "Missing $BUNDLE_FILE. Run npm run build before packaging extensions." >&2
+  exit 1
 fi
 
-mkdir -p "$ROOT_DIR/extensions/chrome" "$ROOT_DIR/extensions/firefox"
-cp "$BUNDLE_TMP" "$ROOT_DIR/extensions/chrome/all-in-one.js"
-cp "$BUNDLE_TMP" "$ROOT_DIR/extensions/firefox/all-in-one.js"
+mkdir -p "$ROOT_DIR/extensions/chrome" "$ROOT_DIR/extensions/firefox" "$ROOT_DIR/extensions/samsung-internet"
+cp "$BUNDLE_FILE" "$ROOT_DIR/extensions/chrome/all-in-one.js"
+cp "$BUNDLE_FILE" "$ROOT_DIR/extensions/firefox/all-in-one.js"
+cp "$BUNDLE_FILE" "$ROOT_DIR/extensions/samsung-internet/all-in-one.js"
 
 cat > "$ROOT_DIR/install-mai-tools.meta.js" <<META
 // ==UserScript==
@@ -78,11 +73,12 @@ cat > "$ROOT_DIR/extensions/chrome/content-script.js" <<'CHROME_CS'
 
   document.documentElement.setAttribute(marker, "chrome");
 
+  const scriptUrl = chrome.runtime.getURL("all-in-one.js");
   const script = document.createElement("script");
-  script.src = chrome.runtime.getURL("all-in-one.js");
+  script.src = scriptUrl;
   script.dataset.source = "mai-tools-chrome-extension";
   script.onload = () => script.remove();
-  (document.head || document.documentElement).append(script);
+  (document.body || document.documentElement).append(script);
 })();
 CHROME_CS
 
@@ -131,11 +127,13 @@ cat > "$ROOT_DIR/extensions/firefox/content-script.js" <<'FIREFOX_CS'
 
   document.documentElement.setAttribute(marker, "firefox");
 
+  const runtime = globalThis.browser?.runtime || globalThis.chrome?.runtime;
+  const scriptUrl = runtime.getURL("all-in-one.js");
   const script = document.createElement("script");
-  script.src = browser.runtime.getURL("all-in-one.js");
+  script.src = scriptUrl;
   script.dataset.source = "mai-tools-firefox-extension";
   script.onload = () => script.remove();
-  (document.head || document.documentElement).append(script);
+  (document.body || document.documentElement).append(script);
 })();
 FIREFOX_CS
 
@@ -180,12 +178,74 @@ cat > "$ROOT_DIR/extensions/firefox/manifest.json" <<MANIFEST_FIREFOX
 }
 MANIFEST_FIREFOX
 
-rm -f "$ROOT_DIR/mai-tools-chrome-extension.zip" "$ROOT_DIR/mai-tools-firefox-extension.zip"
+cat > "$ROOT_DIR/extensions/samsung-internet/content-script.js" <<'SAMSUNG_CS'
+(() => {
+  const marker = "data-mai-tools-extension";
+  if (document.documentElement.hasAttribute(marker)) {
+    return;
+  }
+
+  document.documentElement.setAttribute(marker, "samsung-internet");
+
+  const runtime = globalThis.chrome?.runtime || globalThis.browser?.runtime;
+  const scriptUrl = runtime.getURL("all-in-one.js");
+  const script = document.createElement("script");
+  script.src = scriptUrl;
+  script.dataset.source = "mai-tools-samsung-internet-extension";
+  script.onload = () => script.remove();
+  (document.body || document.documentElement).append(script);
+})();
+SAMSUNG_CS
+
+cat > "$ROOT_DIR/extensions/samsung-internet/manifest.json" <<MANIFEST_SAMSUNG
+{
+  "manifest_version": 3,
+  "name": "mai-tools",
+  "version": "$VERSION",
+  "description": "Run mai-tools on all maimaidx-net pages in Samsung Internet.",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://maimaidx.jp/*",
+        "https://maimaidx-eng.com/*"
+      ],
+      "js": [
+        "content-script.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "host_permissions": [
+    "https://maimaidx.jp/*",
+    "https://maimaidx-eng.com/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "all-in-one.js"
+      ],
+      "matches": [
+        "https://maimaidx.jp/*",
+        "https://maimaidx-eng.com/*"
+      ]
+    }
+  ]
+}
+MANIFEST_SAMSUNG
+
+rm -f "$ROOT_DIR/mai-tools-chrome-extension.zip" "$ROOT_DIR/mai-tools-firefox-extension.zip" "$ROOT_DIR/mai-tools-samsung-internet-extension.zip"
 (
   cd "$ROOT_DIR/extensions/chrome"
-  zip -qr "$ROOT_DIR/mai-tools-chrome-extension.zip" .
+  find . -exec touch -t 200001010000 {} +
+  find . -type f | LC_ALL=C sort | zip -X -q "$ROOT_DIR/mai-tools-chrome-extension.zip" -@
 )
 (
   cd "$ROOT_DIR/extensions/firefox"
-  zip -qr "$ROOT_DIR/mai-tools-firefox-extension.zip" .
+  find . -exec touch -t 200001010000 {} +
+  find . -type f | LC_ALL=C sort | zip -X -q "$ROOT_DIR/mai-tools-firefox-extension.zip" -@
+)
+(
+  cd "$ROOT_DIR/extensions/samsung-internet"
+  find . -exec touch -t 200001010000 {} +
+  find . -type f | LC_ALL=C sort | zip -X -q "$ROOT_DIR/mai-tools-samsung-internet-extension.zip" -@
 )

@@ -10,6 +10,7 @@ on:
     paths:
       - '.github/workflows/update-distribution.yml'
       - 'scripts/generate-distribution.sh'
+      - 'scripts/prepare-upstream-source.mjs'
       - 'webpack.config.js'
       - 'package.json'
       - 'package-lock.json'
@@ -24,45 +25,71 @@ concurrency:
   group: update-distribution-assets
   cancel-in-progress: false
 
+env:
+  UPSTREAM_REPOSITORY: myjian/mai-tools
+  UPSTREAM_REF: gh-pages
+  MAI_TOOLS_ALLOWED_ORIGIN: https://hvboq.github.io
+  MAI_TOOLS_HOSTED_BASE_URL: https://hvboq.github.io/mai-tools
+
 jobs:
   build-and-commit:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository
+      - name: Check out distribution repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          path: distribution
+
+      - name: Check out upstream source
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.UPSTREAM_REPOSITORY }}
+          ref: ${{ env.UPSTREAM_REF }}
+          path: upstream-source
 
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version-file: package.json
+          node-version: 20
           cache: npm
+          cache-dependency-path: upstream-source/package-lock.json
+
+      - name: Prepare upstream source
+        working-directory: distribution
+        run: node scripts/prepare-upstream-source.mjs "$GITHUB_WORKSPACE/upstream-source"
 
       - name: Install dependencies
+        working-directory: upstream-source
         run: npm ci
 
-      - name: Build bundle
+      - name: Build upstream bundle
+        working-directory: upstream-source
         run: npm run build
 
       - name: Generate userscript and extension artifacts
-        run: ./scripts/generate-distribution.sh
+        working-directory: distribution
+        run: MAI_TOOLS_BUILD_DIR="$GITHUB_WORKSPACE/upstream-source/build" ./scripts/generate-distribution.sh
 
       - name: Validate manifests
+        working-directory: distribution
         run: |
           python -m json.tool extensions/chrome/manifest.json >/dev/null
           python -m json.tool extensions/firefox/manifest.json >/dev/null
+          python -m json.tool extensions/samsung-internet/manifest.json >/dev/null
 
       - name: Commit updated artifacts
+        working-directory: distribution
         run: |
-          if git diff --quiet; then
+          if [ -z "$(git status --porcelain)" ]; then
             echo "No distribution changes detected."
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add install-mai-tools.meta.js install-mai-tools.user.js extensions/chrome extensions/firefox mai-tools-chrome-extension.zip mai-tools-firefox-extension.zip
-          git commit -m "chore: update distribution assets"
+          git add install-mai-tools.meta.js install-mai-tools.user.js scripts/prepare-upstream-source.mjs extensions/chrome extensions/firefox extensions/samsung-internet mai-tools-chrome-extension.zip mai-tools-firefox-extension.zip mai-tools-samsung-internet-extension.zip
+          UPSTREAM_SHA=$(git -C "$GITHUB_WORKSPACE/upstream-source" rev-parse --short HEAD)
+          git commit -m "chore: update distribution assets from upstream $UPSTREAM_SHA"
           git push

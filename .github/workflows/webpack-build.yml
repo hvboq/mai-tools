@@ -5,25 +5,47 @@ on:
     branches: ['gh-pages']
   workflow_call:
 
+env:
+  UPSTREAM_REPOSITORY: myjian/mai-tools
+  UPSTREAM_REF: gh-pages
+  MAI_TOOLS_ALLOWED_ORIGIN: https://hvboq.github.io
+  MAI_TOOLS_HOSTED_BASE_URL: https://hvboq.github.io/mai-tools
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Check out distribution repository
         uses: actions/checkout@v4
+        with:
+          path: distribution
+
+      - name: Check out upstream source
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.UPSTREAM_REPOSITORY }}
+          ref: ${{ env.UPSTREAM_REF }}
+          path: upstream-source
 
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version-file: package.json
+          node-version: 20
+          cache: npm
+          cache-dependency-path: upstream-source/package-lock.json
+
+      - name: Prepare upstream source
+        working-directory: distribution
+        run: node scripts/prepare-upstream-source.mjs "$GITHUB_WORKSPACE/upstream-source"
 
       - name: Build
+        working-directory: upstream-source
         run: |
-          npm install
+          npm ci
           npm run build
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: build/
+          path: upstream-source/build/

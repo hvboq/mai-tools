@@ -6,9 +6,11 @@
 
   document.documentElement.setAttribute(marker, "firefox");
 
+  const runtime = globalThis.browser?.runtime || globalThis.chrome?.runtime;
+  const scriptUrl = runtime.getURL("all-in-one.js");
   const script = document.createElement("script");
-  script.src = browser.runtime.getURL("all-in-one.js");
+  script.src = scriptUrl;
   script.dataset.source = "mai-tools-firefox-extension";
   script.onload = () => script.remove();
-  (document.head || document.documentElement).append(script);
+  (document.body || document.documentElement).append(script);
 })();

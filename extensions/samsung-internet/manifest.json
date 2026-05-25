@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "mai-tools",
+  "version": "0.1.1",
+  "description": "Run mai-tools on all maimaidx-net pages in Samsung Internet.",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://maimaidx.jp/*",
+        "https://maimaidx-eng.com/*"
+      ],
+      "js": [
+        "content-script.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "host_permissions": [
+    "https://maimaidx.jp/*",
+    "https://maimaidx-eng.com/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "all-in-one.js"
+      ],
+      "matches": [
+        "https://maimaidx.jp/*",
+        "https://maimaidx-eng.com/*"
+      ]
+    }
+  ]
+}

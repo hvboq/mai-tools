@@ -4,12 +4,13 @@
     return;
   }
 
-  document.documentElement.setAttribute(marker, "chrome");
+  document.documentElement.setAttribute(marker, "samsung-internet");
 
-  const scriptUrl = chrome.runtime.getURL("all-in-one.js");
+  const runtime = globalThis.chrome?.runtime || globalThis.browser?.runtime;
+  const scriptUrl = runtime.getURL("all-in-one.js");
   const script = document.createElement("script");
   script.src = scriptUrl;
-  script.dataset.source = "mai-tools-chrome-extension";
+  script.dataset.source = "mai-tools-samsung-internet-extension";
   script.onload = () => script.remove();
   (document.body || document.documentElement).append(script);
 })();
