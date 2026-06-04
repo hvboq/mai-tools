@@ -1,3 +1,18 @@
 main.bundle.js linguist-generated
 /scripts/*.js linguist-generated
 /extensions/*/all-in-one.js linguist-generated
+
+# Binary distribution artifacts
+*.png binary
+*.zip binary
+
+# Keep packaged text payloads LF on every platform so committed zips stay
+# byte-consistent with the on-disk files (validate-distribution.mjs compares hashes).
+*.svg text eol=lf
+install-mai-tools.user.js text eol=lf
+install-mai-tools.meta.js text eol=lf
+/scripts/*.mjs text eol=lf
+/scripts/*.sh text eol=lf
+/extensions/*/all-in-one.js text eol=lf
+/extensions/*/content-script.js text eol=lf
+/extensions/*/manifest.json text eol=lf

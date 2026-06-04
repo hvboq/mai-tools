@@ -78,6 +78,9 @@ fi
 
 echo "Packaging mai-tools distribution version $VERSION"
 
+echo "Generating icon set"
+node "$ROOT_DIR/scripts/generate-icons.mjs"
+
 mkdir -p "$ROOT_DIR/extensions/chrome" "$ROOT_DIR/extensions/firefox" "$ROOT_DIR/extensions/samsung-internet"
 cp "$BUNDLE_FILE" "$ROOT_DIR/extensions/chrome/all-in-one.js"
 cp "$BUNDLE_FILE" "$ROOT_DIR/extensions/firefox/all-in-one.js"
@@ -89,7 +92,8 @@ cat > "$ROOT_DIR/install-mai-tools.meta.js" <<META
 // @namespace    https://github.com/hvboq/mai-tools
 // @version      $VERSION
 // @description  run mai-tools on all maimaidx-net pages
-// @author       Ming-yuen Jien
+// @author       Ming-Yuan Jian
+// @contributor  hvboq (distribution & packaging)
 // @match        https://maimaidx.jp/*
 // @match        https://maimaidx-eng.com/*
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
@@ -105,7 +109,8 @@ cat > "$ROOT_DIR/install-mai-tools.user.js" <<USER
 // @namespace    https://github.com/hvboq/mai-tools
 // @version      $VERSION
 // @description  run mai-tools on all maimaidx-net pages
-// @author       Ming-yuen Jien
+// @author       Ming-Yuan Jian
+// @contributor  hvboq (distribution & packaging)
 // @match        https://maimaidx.jp/*
 // @match        https://maimaidx-eng.com/*
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
@@ -155,6 +160,12 @@ cat > "$ROOT_DIR/extensions/chrome/manifest.json" <<MANIFEST_CHROME
   "name": "mai-tools",
   "version": "$VERSION",
   "description": "Run mai-tools on all maimaidx-net pages.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
   "content_scripts": [
     {
       "matches": [
@@ -210,6 +221,12 @@ cat > "$ROOT_DIR/extensions/firefox/manifest.json" <<MANIFEST_FIREFOX
   "name": "mai-tools",
   "version": "$VERSION",
   "description": "Run mai-tools on all maimaidx-net pages.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
   "browser_specific_settings": {
     "gecko": {
       "id": "mai-tools@hvboq.github.io"
@@ -270,6 +287,12 @@ cat > "$ROOT_DIR/extensions/samsung-internet/manifest.json" <<MANIFEST_SAMSUNG
   "name": "mai-tools",
   "version": "$VERSION",
   "description": "Run mai-tools on all maimaidx-net pages in Samsung Internet.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
   "content_scripts": [
     {
       "matches": [
@@ -301,18 +324,6 @@ cat > "$ROOT_DIR/extensions/samsung-internet/manifest.json" <<MANIFEST_SAMSUNG
 MANIFEST_SAMSUNG
 
 rm -f "$ROOT_DIR/mai-tools-chrome-extension.zip" "$ROOT_DIR/mai-tools-firefox-extension.zip" "$ROOT_DIR/mai-tools-samsung-internet-extension.zip"
-(
-  cd "$ROOT_DIR/extensions/chrome"
-  find . -exec touch -t 200001010000 {} +
-  find . -type f | LC_ALL=C sort | zip -X -q "$ROOT_DIR/mai-tools-chrome-extension.zip" -@
-)
-(
-  cd "$ROOT_DIR/extensions/firefox"
-  find . -exec touch -t 200001010000 {} +
-  find . -type f | LC_ALL=C sort | zip -X -q "$ROOT_DIR/mai-tools-firefox-extension.zip" -@
-)
-(
-  cd "$ROOT_DIR/extensions/samsung-internet"
-  find . -exec touch -t 200001010000 {} +
-  find . -type f | LC_ALL=C sort | zip -X -q "$ROOT_DIR/mai-tools-samsung-internet-extension.zip" -@
-)
+node "$ROOT_DIR/scripts/pack-extension.mjs" "$ROOT_DIR/extensions/chrome" "$ROOT_DIR/mai-tools-chrome-extension.zip"
+node "$ROOT_DIR/scripts/pack-extension.mjs" "$ROOT_DIR/extensions/firefox" "$ROOT_DIR/mai-tools-firefox-extension.zip"
+node "$ROOT_DIR/scripts/pack-extension.mjs" "$ROOT_DIR/extensions/samsung-internet" "$ROOT_DIR/mai-tools-samsung-internet-extension.zip"

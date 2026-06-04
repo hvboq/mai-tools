@@ -2,6 +2,13 @@
 
 This workspace contains userscript URLs and bundled extension packages for `mai-tools`.
 
+The original `mai-tools` application is created and maintained by **Ming-Yuan Jian**
+([myjian/mai-tools](https://github.com/myjian/mai-tools)). This repository is a
+distribution/packaging fork maintained by **hvboq**, which hosts the built artifacts and
+produces store-ready userscript and browser-extension packages. All application source
+code remains the original author's work; the contributions here are limited to
+distribution, packaging, and hosting.
+
 ## 1. Userscript subscription URLs
 
 - jsDelivr install URL: `https://cdn.jsdelivr.net/gh/hvboq/mai-tools@gh-pages/install-mai-tools.user.js`
@@ -58,6 +65,14 @@ review/approval before public release. See `extensions/samsung-internet/README.m
 
 - Chrome, Firefox, and Samsung Internet extension packages bundle `all-in-one.js` for
   store submission. Rebuild and repackage them whenever source code changes.
+- Extension icons (`extensions/*/icons/`) are generated from a single geometric
+  definition by `scripts/generate-icons.mjs` (`npm run icons`), which emits both the SVG
+  source and the 16/32/48/128px PNGs with no native image dependency. The design is an
+  original touch-panel motif and deliberately avoids the trademarked maimai logo so the
+  packages pass Chrome Web Store / AMO trademark review.
+- Extension archives are produced by `scripts/pack-extension.mjs`, a dependency-free
+  deterministic zip packer, so packaging works the same on Windows and CI without a
+  system `zip` binary.
 - Distribution versions are generated from the source repository commit date and count
   unless `MAI_TOOLS_VERSION` is set explicitly.
 - The scheduled distribution workflow and GitHub Pages deploy build the upstream

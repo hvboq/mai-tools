@@ -12,6 +12,8 @@ on:
       - 'scripts/generate-distribution.sh'
       - 'scripts/prepare-upstream-source.mjs'
       - 'scripts/validate-distribution.mjs'
+      - 'scripts/generate-icons.mjs'
+      - 'scripts/pack-extension.mjs'
       - 'webpack.config.js'
       - 'package.json'
       - 'package-lock.json'
@@ -91,7 +93,7 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add install-mai-tools.meta.js install-mai-tools.user.js scripts/prepare-upstream-source.mjs extensions/chrome extensions/firefox extensions/samsung-internet mai-tools-chrome-extension.zip mai-tools-firefox-extension.zip mai-tools-samsung-internet-extension.zip
+          git add install-mai-tools.meta.js install-mai-tools.user.js scripts/prepare-upstream-source.mjs assets/icons extensions/chrome extensions/firefox extensions/samsung-internet mai-tools-chrome-extension.zip mai-tools-firefox-extension.zip mai-tools-samsung-internet-extension.zip
           UPSTREAM_SHA=$(git -C "$GITHUB_WORKSPACE/upstream-source" rev-parse --short HEAD)
           git commit -m "chore: update distribution assets from upstream $UPSTREAM_SHA"
           git push

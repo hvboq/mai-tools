@@ -19,24 +19,32 @@ const forbiddenBaseUrls = (
   .map((value) => value.trim())
   .filter(Boolean);
 
+const iconFiles = [
+  'icons/icon.svg',
+  'icons/icon-16.png',
+  'icons/icon-32.png',
+  'icons/icon-48.png',
+  'icons/icon-128.png',
+];
+
 const extensionTargets = [
   {
     name: 'chrome',
     dir: 'extensions/chrome',
     zip: 'mai-tools-chrome-extension.zip',
-    files: ['all-in-one.js', 'content-script.js', 'manifest.json'],
+    files: ['all-in-one.js', 'content-script.js', 'manifest.json', ...iconFiles],
   },
   {
     name: 'firefox',
     dir: 'extensions/firefox',
     zip: 'mai-tools-firefox-extension.zip',
-    files: ['all-in-one.js', 'content-script.js', 'manifest.json'],
+    files: ['all-in-one.js', 'content-script.js', 'manifest.json', ...iconFiles],
   },
   {
     name: 'samsung-internet',
     dir: 'extensions/samsung-internet',
     zip: 'mai-tools-samsung-internet-extension.zip',
-    files: ['all-in-one.js', 'content-script.js', 'manifest.json', 'README.md'],
+    files: ['all-in-one.js', 'content-script.js', 'manifest.json', 'README.md', ...iconFiles],
   },
 ];
 
@@ -166,6 +174,13 @@ for (const target of extensionTargets) {
   const manifest = JSON.parse(readText(manifestPath));
   validateVersion(manifest.version, `${target.name} manifest`);
   versions.set(target.name, manifest.version);
+
+  for (const size of [16, 32, 48, 128]) {
+    check(
+      manifest.icons && manifest.icons[size] === `icons/icon-${size}.png`,
+      `${target.name} manifest must declare icons.${size} -> icons/icon-${size}.png`,
+    );
+  }
 
   const contentScript = readText(`${target.dir}/content-script.js`);
   check(

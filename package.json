@@ -5,6 +5,7 @@
   "main": "public/index.html",
   "scripts": {
     "build": "webpack",
+    "icons": "node scripts/generate-icons.mjs",
     "validate:distribution": "node scripts/validate-distribution.mjs",
     "watch": "webpack --env development --watch",
     "start": "npx serve build -l 8080"
@@ -15,6 +16,9 @@
   },
   "keywords": [],
   "author": "Ming-Yuan Jian",
+  "contributors": [
+    "hvboq (distribution & packaging)"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/myjian/mai-tools/issues"

@@ -3,7 +3,8 @@
 // @namespace    https://github.com/hvboq/mai-tools
 // @version      0.26.129.558
 // @description  run mai-tools on all maimaidx-net pages
-// @author       Ming-yuen Jien
+// @author       Ming-Yuan Jian
+// @contributor  hvboq (distribution & packaging)
 // @match        https://maimaidx.jp/*
 // @match        https://maimaidx-eng.com/*
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
