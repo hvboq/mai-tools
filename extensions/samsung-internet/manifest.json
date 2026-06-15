@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "mai-tools",
-  "version": "0.26.145.604",
+  "version": "0.26.129.1",
   "description": "Run mai-tools on all maimaidx-net pages in Samsung Internet.",
   "content_scripts": [
     {
