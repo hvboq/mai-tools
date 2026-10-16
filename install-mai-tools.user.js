@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         run mai-tools on all maimaidx-net pages
 // @namespace    https://github.com/hvboq/mai-tools
-// @version      0.26.262.1
+// @version      0.26.289.1
 // @description  run mai-tools on all maimaidx-net pages
 // @author       Ming-yuen Jien
 // @match        https://maimaidx.jp/*
